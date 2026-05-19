@@ -7,7 +7,7 @@ import { buildSystemPrompt, buildUserPrompt } from "./prompts";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-haiku-4-5-20251001";
-const MAX_TOKENS = 4000;
+const MAX_TOKENS = 8000;
 
 /**
  * Calls the Anthropic API via the Next.js server-side API route.
@@ -67,12 +67,23 @@ export async function callClaude(
   const data = await response.json();
   const rawText: string = data.content?.[0]?.text ?? "";
 
-  // Strip any accidental markdown fences
-  const cleaned = rawText.replace(/```json|```/g, "").trim();
+  const firstBrace = rawText.indexOf("{");
+  const lastBrace = rawText.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1) {
+    throw new Error("Failed to parse AI response as JSON. Try again.");
+  }
+
+  const jsonStr = rawText.slice(firstBrace, lastBrace + 1);
 
   try {
-    return JSON.parse(cleaned) as TravelPlan;
+    return JSON.parse(jsonStr) as TravelPlan;
   } catch {
-    throw new Error("Failed to parse AI response as JSON. Try again.");
+    const cleaned = rawText.replace(/```json|```/g, "").trim();
+    try {
+      return JSON.parse(cleaned) as TravelPlan;
+    } catch {
+      throw new Error("Failed to parse AI response as JSON. Try again.");
+    }
   }
 }
