@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet map CSS (required for react-leaflet) */
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Sora", sans-serif;
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  * {
+    @apply box-border;
+  }
+}
+
+@layer components {
+  /* Card base */
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-500 to-cyan-500 bg-clip-text text-transparent;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-brand-500 to-cyan-500 text-white font-bold rounded-xl
+           transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-500/30
+           disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 text-slate-600 font-semibold rounded-lg
+           hover:bg-slate-100 transition-colors duration-150;
+  }
+
+  /* Form inputs */
+  .input {
+    @apply w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-sans
+           focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10
+           transition-colors duration-150 placeholder:text-slate-400;
+  }
+
+  /* Section title */
+  .section-label {
+    @apply text-xs font-bold uppercase tracking-widest text-brand-600 mb-4;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    @apply flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto;
+  }
+
+  .tab-item {
+    @apply flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold text-slate-500
+           transition-all duration-150 cursor-pointer border-none font-sans;
+  }
+
+  .tab-item.active {
+    @apply bg-white text-brand-600 shadow-sm;
+  }
+
+  /* Spinner */
+  .spinner {
+    @apply w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin;
+  }
+}
+
+/* Leaflet marker fix for Next.js */
+.leaflet-default-icon-path {
+  background-image: none;
+}
