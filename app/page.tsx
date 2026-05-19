@@ -31,12 +31,15 @@ const DEFAULT_FORM: TravelFormData = {
   budgetLevel: "mid",
   budgetAmount: "",           // np. "500 PLN" lub "200 EUR"
   days: 3,                    // domyślnie 3 dni
+  dateFrom: "",
+  dateTo: "",
   season: "",
   preferences: "",
 };
 
 export default function Home() {
   const [lang, setLang] = useLocalStorage<Lang>("travel_ai_lang", "pl");
+  const [dark, setDark] = useLocalStorage<boolean>("travel_ai_dark", false);
   const [viewMode, setViewMode] = useState<ViewMode>("desktop");
   const [page, setPage] = useState<Page>("landing");
   const [activeTab, setActiveTab] = useState<Tab>("phrasebook");
@@ -177,10 +180,46 @@ export default function Home() {
               <input className="input" placeholder={tr.placeholders.language}
                 value={formData.language} onChange={e => updateForm("language", e.target.value)} />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5">{tr.season}</label>
-              <input className="input" placeholder={tr.placeholders.season}
-                value={formData.season} onChange={e => updateForm("season", e.target.value)} />
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                📅 {tr.season}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] text-slate-400 mb-1">
+                    {lang === "pl" ? "Data przyjazdu" : "Check-in"}
+                  </label>
+                  <input type="date" className="input text-sm"
+                    value={formData.dateFrom || ""}
+                    onChange={e => {
+                      updateForm("dateFrom", e.target.value);
+                      const to = formData.dateTo || "";
+                      updateForm("season", e.target.value && to ? `${e.target.value} to ${to}` : e.target.value);
+                    }} />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 mb-1">
+                    {lang === "pl" ? "Data wyjazdu" : "Check-out"}
+                  </label>
+                  <input type="date" className="input text-sm"
+                    value={formData.dateTo || ""}
+                    min={formData.dateFrom || ""}
+                    onChange={e => {
+                      updateForm("dateTo", e.target.value);
+                      const from = formData.dateFrom || "";
+                      updateForm("season", from && e.target.value ? `${from} to ${e.target.value}` : e.target.value);
+                      if (from && e.target.value) {
+                        const diff = Math.round((new Date(e.target.value).getTime() - new Date(from).getTime()) / (1000*60*60*24));
+                        if (diff > 0) updateForm("days", diff);
+                      }
+                    }} />
+                </div>
+              </div>
+              {formData.dateFrom && formData.dateTo && (
+                <p className="text-xs text-brand-600 mt-1.5 font-semibold">
+                  {Math.round((new Date(formData.dateTo).getTime() - new Date(formData.dateFrom).getTime()) / (1000*60*60*24))} {lang === "pl" ? "dni" : "days"} 🗓️
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -471,8 +510,9 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={dark ? "dark min-h-screen bg-slate-900" : "min-h-screen bg-slate-50"}>
       <Navbar lang={lang} setLang={setLang} viewMode={viewMode} setViewMode={setViewMode}
+      dark={dark} setDark={setDark}
         onLogoClick={() => setPage("landing")} />
 
       {/* Responsive preview wrapper */}

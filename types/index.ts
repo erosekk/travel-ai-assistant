@@ -23,6 +23,8 @@ export interface TravelFormData {
   budgetLevel: BudgetLevel;     // niski / średni / wysoki (kontekst dla AI)
   budgetAmount: string;         // kwota wpisana ręcznie np. "500 PLN"
   days: number;                 // liczba dni wyjazdu 1–14
+  dateFrom: string;
+  dateTo: string;
   season: string;
   preferences: string;
 }
