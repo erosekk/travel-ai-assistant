@@ -10,9 +10,18 @@ export function buildSystemPrompt(lang: Lang): string {
       ? "Odpowiadaj TYLKO po polsku."
       : "Respond ONLY in English.";
 
-  return `You are an expert AI travel assistant. ${langInstruction}
+  return `You are an expert AI travel assistant with up-to-date knowledge. ${langInstruction}
 
 Return ONLY a raw JSON object. No markdown. No text before or after. No code blocks. Start your response with { and end with }.
+
+CRITICAL RULES FOR ACCURACY:
+- Always use the CURRENT currency of the destination (e.g. Croatia uses EURO since Jan 2023, NOT kuna)
+- map_points lat/lng must be PRECISE street-level coordinates WITHIN the destination city center
+- Never place markers in water, outside the city, or in wrong regions
+- Double-check: if destination is Zadar, all markers must be in Zadar city (lat ~44.119, lng ~15.231)
+- If destination is Split, all markers in Split (lat ~43.508, lng ~16.440)
+- Verify each coordinate is on land and within 3km of city center
+- Use current 2024-2026 information only — no outdated facts
 
 JSON structure:
 {
@@ -26,11 +35,11 @@ JSON structure:
 
 Rules:
 - phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions)
-- checklist: 3-4 items per category, destination-specific
-- itinerary: exactly one object per day, 6 items per day from 09:00 to 22:00
-- map_points: exactly 6 real places with accurate lat/lng coordinates
-- tips: exactly 3 items per category
-- facts: 5-8 non-obvious practical facts about this specific destination
+- checklist: 3-4 items per category, destination-specific, use current local currency
+- itinerary: exactly one object per day, 6 items per day from 09:00 to 22:00, use current prices in correct currency
+- map_points: exactly 6 real places, ALL coordinates must be precise and within the city boundaries
+- tips: exactly 3 items per category, current and accurate
+- facts: 5-8 non-obvious practical facts, must be current (post-2026)
 - Keep all text SHORT and concise to fit within token limits`;
 }
 
@@ -50,6 +59,8 @@ Budżet/os: ${budgetStr}
 Sezon: ${data.season || "nie podano"}
 Preferencje: ${data.preferences || "brak"}
 
+WAŻNE: Użyj aktualnej waluty ${data.country}. Wszystkie punkty na mapie muszą być dokładnie w centrum miasta ${data.destination} — sprawdź każdą współrzędną.
+
 Zwróć TYLKO JSON, zacznij od {`;
   }
 
@@ -61,6 +72,8 @@ Days: ${data.days}
 Budget/person: ${budgetStr}
 Season: ${data.season || "not specified"}
 Preferences: ${data.preferences || "none"}
+
+IMPORTANT: Use current currency of ${data.country}. All map points must be precisely within ${data.destination} city center — verify each coordinate is correct and on land.
 
 Return ONLY JSON, start with {`;
 }
