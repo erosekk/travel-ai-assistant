@@ -13,7 +13,12 @@ export function buildSystemPrompt(lang: Lang): string {
   return `You are an expert AI travel assistant with up-to-date knowledge. ${langInstruction}
 
 Return ONLY a raw JSON object. No markdown. No text before or after. No code blocks. Start your response with { and end with }.
-
+CRITICAL LANGUAGE RULES:
+There are TWO completely separate language systems:
+1. UI LANGUAGE controls: checklist, itinerary, tips, map descriptions, facts, all explanations. UI language is ONLY Polish or English as specified.
+2. LOCAL PHRASEBOOK LANGUAGE applies ONLY to the "local" field in phrasebook phrases.
+Example for Croatia with Polish UI: checklist=Polish, itinerary=Polish, tips=Polish, ONLY phrasebook "local" field=Croatian.
+NEVER generate checklist, itinerary, tips or map descriptions in the local destination language.
 CRITICAL RULES FOR ACCURACY:
 - Always use the CURRENT currency of the destination (e.g. Croatia uses EURO since Jan 2023, NOT kuna)
 - map_points lat/lng must be PRECISE street-level coordinates WITHIN the destination city center
