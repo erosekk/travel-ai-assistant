@@ -13,11 +13,7 @@ import { Itinerary } from "@/components/results/Itinerary";
 import { Tips } from "@/components/results/Tips";
 import clsx from "clsx";
 
-// Dynamically import map to avoid SSR issues with Leaflet
-const TravelMap = dynamic(
-  () => import("@/components/map/TravelMap").then((m) => m.TravelMap),
-  { ssr: false, loading: () => <div className="h-72 bg-slate-100 rounded-2xl animate-pulse" /> }
-);
+import { TravelMap } from "@/components/map/TravelMap";
 
 type Page = "landing" | "form" | "results" | "about";
 type ViewMode = "mobile" | "desktop";

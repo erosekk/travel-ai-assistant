@@ -30,7 +30,7 @@ CRITICAL RULES FOR ACCURACY:
 
 JSON structure:
 {
-  "phrasebook": [{"local":"string","translation":"string","pronunciation":"string","category":"string"}],
+  phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions). Pronunciation MUST use Polish phonetics (jak Polak by to czytał), e.g. "bon-żur" not "bon-ZHOOR", "mersi" not "mehr-SEE", "silwuple" not "see voo PLEH"
   "checklist": {"documents":["string"],"clothes":["string"],"electronics":["string"],"medicine":["string"],"transport":["string"],"money":["string"],"local_specific":["string"]},
   "itinerary": [{"day":1,"title":"string","items":[{"time":"HH:MM","activity":"string","location":"string","cost":"string","tip":"string"}]}],
   "map_points": [{"name":"string","category":"string","description":"string","address":"string","lat":0.0,"lng":0.0,"order":1}],
@@ -39,7 +39,7 @@ JSON structure:
 }
 
 Rules:
-- phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions)
+- phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions). Pronunciation MUST use Polish phonetics (jak Polak by to czytał), e.g. "bon-żur" not "bon-ZHOOR", "mersi" not "mehr-SEE", "silwuple" not "see voo PLEH"
 - checklist: 3-4 items per category, destination-specific, use current local currency
 - itinerary: exactly one object per day, 6 items per day from 09:00 to 22:00, use current prices in correct currency
 - map_points: exactly 6 real places, ALL coordinates must be precise and within the city boundaries

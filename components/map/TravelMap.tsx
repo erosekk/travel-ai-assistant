@@ -1,166 +1,135 @@
-// components/map/TravelMap.tsx
-// Uses dynamic import in parent — this file is client-only
 "use client";
 
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import type { LatLngTuple } from "leaflet";
+import { useState } from "react";
 import { MapPoint, Lang } from "@/types";
-import { t } from "@/lib/i18n";
 
-// Fix Leaflet default icon issue in Next.js
-import L from "leaflet";
+const CATEGORY_ICONS: Record<string, string> = {
+  restaurant: "🍽️", food: "🍽️", museum: "🏛️", culture: "🏛️",
+  park: "🌿", nature: "🌿", beach: "🏖️", hotel: "🏨",
+  accommodation: "🏨", landmark: "📍", attraction: "⭐",
+  transport: "🚌", nightlife: "🎵", bar: "🍷", shop: "🛍️",
+};
 
-function createNumberedIcon(index: number, category: string): L.DivIcon {
-  const colorMap: Record<string, string> = {
-    restaurant: "#f97316",
-    food: "#f97316",
-    museum: "#8b5cf6",
-    culture: "#8b5cf6",
-    park: "#22c55e",
-    nature: "#22c55e",
-    hotel: "#3b82f6",
-    accommodation: "#3b82f6",
-    landmark: "#ec4899",
-    attraction: "#ec4899",
-    transport: "#64748b",
-    nightlife: "#a855f7",
-    bar: "#a855f7",
-  };
-  const color = colorMap[category.toLowerCase()] ?? "#14b8a6";
-
-  return L.divIcon({
-    html: `
-      <div style="
-        background: ${color};
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 13px;
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-        font-family: Sora, sans-serif;
-      ">${index}</div>
-    `,
-    className: "",
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -18],
-  });
-}
-
-// Auto-fit map to all markers
-function FitBounds({ points }: { points: MapPoint[] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (points.length === 0) return;
-    const bounds = points.map((p) => [p.lat, p.lng] as LatLngTuple);
-    map.fitBounds(bounds, { padding: [40, 40] });
-  }, [map, points]);
-  return null;
-}
+const CATEGORY_COLORS: Record<string, string> = {
+  restaurant: "bg-orange-100 text-orange-700 border-orange-200",
+  food: "bg-orange-100 text-orange-700 border-orange-200",
+  museum: "bg-purple-100 text-purple-700 border-purple-200",
+  culture: "bg-purple-100 text-purple-700 border-purple-200",
+  park: "bg-green-100 text-green-700 border-green-200",
+  nature: "bg-green-100 text-green-700 border-green-200",
+  beach: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  landmark: "bg-pink-100 text-pink-700 border-pink-200",
+  attraction: "bg-pink-100 text-pink-700 border-pink-200",
+  transport: "bg-slate-100 text-slate-700 border-slate-200",
+  nightlife: "bg-violet-100 text-violet-700 border-violet-200",
+  bar: "bg-violet-100 text-violet-700 border-violet-200",
+};
 
 interface TravelMapProps {
   points: MapPoint[];
   lang: Lang;
+  destination?: string;
+  country?: string;
 }
 
-export function TravelMap({ points, lang }: TravelMapProps) {
-  const tr = t(lang);
+export function TravelMap({ points, lang, destination, country }: TravelMapProps) {
   const [selected, setSelected] = useState<MapPoint | null>(null);
+  const isPL = lang === "pl";
+
+  const googleMapsUrl = (pt: MapPoint) => {
+    const query = encodeURIComponent(`${pt.name} ${pt.address || ""} ${destination || ""}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  };
+
+  const googleMapsAllUrl = () => {
+    const query = encodeURIComponent(`${destination || ""} ${country || ""}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  };
+
+  // Embedded Google Maps iframe URL
+  const embedUrl = destination
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(`${destination} ${country || ""}`)}&output=embed&z=14`
+    : null;
 
   if (!points || points.length === 0) {
     return (
-      <div className="flex items-center justify-center h-72 rounded-2xl bg-slate-50
-                      border-2 border-dashed border-slate-200">
-        <p className="text-slate-400 text-sm">{tr.noResults}</p>
+      <div className="flex items-center justify-center h-48 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200">
+        <p className="text-slate-400 text-sm">{isPL ? "Brak wyników." : "No results."}</p>
       </div>
     );
   }
 
-  const center: LatLngTuple = [points[0].lat, points[0].lng];
-
   return (
-    <div className="space-y-3">
-      <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: 400 }}>
-        <MapContainer
-          center={center}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <div className="space-y-4">
+
+      {/* Google Maps iframe */}
+      {embedUrl && (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: 340 }}>
+          <iframe
+            src={embedUrl}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           />
-          <FitBounds points={points} />
-
-          {points.map((pt, i) => (
-            <Marker
-              key={i}
-              position={[pt.lat, pt.lng]}
-              icon={createNumberedIcon(pt.order ?? i + 1, pt.category)}
-              eventHandlers={{ click: () => setSelected(pt) }}
-            >
-              <Popup>
-                <strong>{pt.name}</strong>
-                <br />
-                <span className="text-xs text-gray-500">{pt.category}</span>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      </div>
-
-      {/* Selected place detail */}
-      {selected && (
-        <div className="p-4 rounded-xl bg-brand-50 border border-brand-200 animate-fade-in">
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-bold text-slate-900">{selected.name}</h4>
-              <span className="text-xs uppercase tracking-wider text-brand-600 font-semibold">
-                {selected.category}
-              </span>
-            </div>
-            <button
-              onClick={() => setSelected(null)}
-              className="text-slate-400 hover:text-slate-600 transition-colors text-lg leading-none"
-            >
-              ✕
-            </button>
-          </div>
-          <p className="text-sm text-slate-700 mt-2">{selected.description}</p>
-          <p className="text-xs text-slate-500 mt-1">📍 {selected.address}</p>
         </div>
       )}
 
-      {/* Legend / list */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {points.map((pt, i) => (
-          <button
-            key={i}
-            onClick={() => setSelected(pt)}
-            className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-white
-                       hover:border-brand-300 hover:bg-brand-50/40 transition-all duration-150 text-left"
-          >
-            <span className="text-xs font-bold text-brand-600 bg-brand-100 rounded-full
-                             w-6 h-6 flex items-center justify-center flex-shrink-0">
-              {pt.order ?? i + 1}
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-800 truncate">{pt.name}</p>
-              <p className="text-xs text-slate-400 truncate">{pt.address}</p>
-            </div>
-          </button>
-        ))}
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 className="font-bold text-slate-900 text-base">
+            {isPL ? "Polecane miejsca" : "Recommended places"}
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {isPL ? "Kliknij → otwiera Google Maps z dokładną lokalizacją" : "Click → opens Google Maps with exact location"}
+          </p>
+        </div>
+        <a href={googleMapsAllUrl()} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-brand-400 hover:text-brand-600 transition-all shadow-sm">
+          🗺️ {isPL ? "Otwórz Google Maps" : "Open Google Maps"}
+        </a>
       </div>
 
-      <p className="text-xs text-slate-400">{tr.mapNote}</p>
+      {/* Places list */}
+      <div className="grid grid-cols-1 gap-3">
+        {points.map((pt, i) => {
+          const icon = CATEGORY_ICONS[pt.category?.toLowerCase()] ?? "📍";
+          const colorClass = CATEGORY_COLORS[pt.category?.toLowerCase()] ?? "bg-brand-50 text-brand-700 border-brand-200";
+          const isSelected = selected?.name === pt.name;
+          return (
+            <div key={i} className={`rounded-xl border-2 transition-all duration-150 overflow-hidden ${isSelected ? "border-brand-400 shadow-md" : "border-slate-200 hover:border-brand-300"}`}>
+              <button onClick={() => setSelected(isSelected ? null : pt)}
+                className="w-full flex items-center gap-3 p-3.5 text-left bg-white hover:bg-slate-50 transition-colors">
+                <span className="w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  {pt.order ?? i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-900 text-sm truncate">{pt.name}</p>
+                  <p className="text-xs text-slate-400 truncate">{pt.address}</p>
+                </div>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ${colorClass}`}>{icon}</span>
+                <span className={`text-slate-400 text-sm transition-transform duration-150 ${isSelected ? "rotate-180" : ""}`}>▾</span>
+              </button>
+              {isSelected && (
+                <div className="px-4 pb-4 pt-1 bg-white border-t border-slate-100">
+                  <p className="text-sm text-slate-600 mb-3 leading-relaxed">{pt.description}</p>
+                  <a href={googleMapsUrl(pt)} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-500 text-white text-sm font-bold hover:bg-brand-600 transition-colors">
+                    🗺️ {isPL ? "Znajdź w Google Maps" : "Find in Google Maps"}
+                  </a>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-xs text-slate-400 text-center">
+        {isPL ? "Miejsca wygenerowane przez AI • Google Maps zapewnia dokładną lokalizację" : "AI-generated places • Google Maps provides accurate location"}
+      </p>
     </div>
   );
 }
