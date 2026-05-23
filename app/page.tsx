@@ -438,7 +438,8 @@ export default function Home() {
               <Itinerary data={results.itinerary} />
             )}
             {activeTab === "map" && (
-              <TravelMap points={results.map_points ?? []} lang={lang} />
+              <TravelMap points={results.map_points ?? []} lang={lang}
+                destination={formData.destination} country={formData.country} />
             )}
             {activeTab === "tips" && results.tips && (
               <Tips data={results.tips} />
