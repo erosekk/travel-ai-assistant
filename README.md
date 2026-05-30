@@ -8,7 +8,7 @@
 
 ## 🚀 Live Demo
 
-🔗 **[travel-ai-assistant.vercel.app](https://travel-ai-assistant.vercel.app)**
+🔗 **[travel-ai-assistant-beta.vercel.app](https://travel-ai-assistant-beta.vercel.app)**
 
 ---
 
