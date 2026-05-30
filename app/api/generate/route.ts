@@ -7,13 +7,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { callClaude } from "@/lib/ai";
 import { GenerateRequest } from "@/types";
 
+const parseDestinations = (value: string) =>
+  value
+    .split(/[\n,;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
 export async function POST(req: NextRequest) {
   try {
     const body: GenerateRequest = await req.json();
     const { formData, lang } = body;
+    const destinations = formData.destinations?.length
+      ? formData.destinations
+      : parseDestinations(formData.destination);
 
     // Validate required fields
-    if (!formData.destination || !formData.country || !formData.language) {
+    if (!destinations.length || !formData.country) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
         { status: 400 }
@@ -29,7 +38,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data = await callClaude(formData, lang, apiKey);
+    const data = await callClaude(
+      {
+        ...formData,
+        destination: destinations.join(", "),
+        destinations,
+      },
+      lang,
+      apiKey
+    );
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

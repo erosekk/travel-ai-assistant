@@ -16,14 +16,14 @@ export const translations = {
     // Landing
     heroTitle: "Odkryj świat z AI",
     heroSub:
-      "Generuj frazownik, checklistę, plan dnia i mapę dla dowolnego miasta — w kilka sekund.",
+      "Generuj frazownik, checklistę, plan dnia i mapę dla jednego lub kilku miast w kilka sekund.",
     startBtn: "Zaplanuj podróż",
     aboutBtn: "O projekcie",
 
     // Form labels
-    destination: "Miasto docelowe",
+    destination: "Miasto / miasta docelowe",
+    destinationHint: "Wpisz jedno miasto albo kilka po przecinku lub w osobnych liniach.",
     country: "Kraj",
-    language: "Język lokalny (cel podróży)",
     tripStyle: "Styl podróży",
     tripStyleHint: "wybierz jeden lub więcej",
     budget: "Budżet",
@@ -42,11 +42,10 @@ export const translations = {
 
     // Placeholders
     placeholders: {
-      destination: "np. Barcelona",
+      destination: "np. Barcelona albo Ateny, Naksos, Santorini",
       country: "np. Hiszpania",
-      language: "np. Hiszpański",
       season: "np. Lato, Lipiec 2025",
-      preferences: "np. wegetarianin, z dziećmi, pierwsza wizyta...",
+      preferences: "np. wynajmujemy auto, 2 dzieci, spokojne tempo, wegetarianin...",
     },
 
     // Styles
@@ -92,7 +91,7 @@ export const translations = {
 
     // Errors
     errors: {
-      fillRequired: "Wypełnij wymagane pola: Miasto, Kraj i Język.",
+      fillRequired: "Wypełnij wymagane pola: miasto lub miasta oraz kraj.",
       apiKeyMissing: "Wklej swój klucz Anthropic API, aby kontynuować.",
       apiError: "Błąd API. Sprawdź klucz i spróbuj ponownie.",
       parseError: "Błąd parsowania odpowiedzi AI. Spróbuj ponownie.",
@@ -128,13 +127,13 @@ export const translations = {
 
     heroTitle: "Discover the World with AI",
     heroSub:
-      "Generate a phrasebook, checklist, daily itinerary and map for any city — in seconds.",
+      "Generate a phrasebook, checklist, itinerary and map for one or several cities in seconds.",
     startBtn: "Plan a Trip",
     aboutBtn: "About",
 
-    destination: "Destination City",
+    destination: "Destination city / cities",
+    destinationHint: "Enter one city, or several separated by commas or new lines.",
     country: "Country",
-    language: "Local Language (destination)",
     tripStyle: "Trip Style",
     tripStyleHint: "pick one or more",
     budget: "Budget",
@@ -152,11 +151,10 @@ export const translations = {
     required: "Required",
 
     placeholders: {
-      destination: "e.g. Barcelona",
+      destination: "e.g. Barcelona or Athens, Naxos, Santorini",
       country: "e.g. Spain",
-      language: "e.g. Spanish",
       season: "e.g. Summer, July 2025",
-      preferences: "e.g. vegetarian, with kids, first visit...",
+      preferences: "e.g. rental car, 2 kids, slower pace, vegetarian...",
     },
 
     styles: {
@@ -195,7 +193,7 @@ export const translations = {
     apiKeyHint: "Your key is stored only locally in your browser.",
 
     errors: {
-      fillRequired: "Fill required fields: City, Country and Language.",
+      fillRequired: "Fill required fields: city or cities and country.",
       apiKeyMissing: "Paste your Anthropic API key to continue.",
       apiError: "API Error. Check your key and try again.",
       parseError: "Failed to parse AI response. Please try again.",

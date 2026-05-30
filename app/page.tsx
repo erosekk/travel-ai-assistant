@@ -1,9 +1,8 @@
 // app/page.tsx
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState, useCallback } from "react";
-import { Lang, TravelFormData, TravelPlan, TripStyle, BudgetLevel, ItineraryDay } from "@/types";
+import { Lang, TravelFormData, TravelPlan, TripStyle, BudgetLevel } from "@/types";
 import { t } from "@/lib/i18n";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Navbar } from "@/components/ui/Navbar";
@@ -21,8 +20,8 @@ type Tab = "phrasebook" | "checklist" | "itinerary" | "map" | "tips";
 
 const DEFAULT_FORM: TravelFormData = {
   destination: "",
+  destinations: [],
   country: "",
-  language: "",
   tripStyles: ["culture"],    // tablica — można wybrać wiele
   budgetLevel: "mid",
   budgetAmount: "",           // np. "500 PLN" lub "200 EUR"
@@ -32,6 +31,15 @@ const DEFAULT_FORM: TravelFormData = {
   season: "",
   preferences: "",
 };
+
+const parseDestinations = (value: string) =>
+  value
+    .split(/[\n,;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const getDestinations = (data: TravelFormData) =>
+  data.destinations?.length ? data.destinations : parseDestinations(data.destination);
 
 export default function Home() {
   const [lang, setLang] = useLocalStorage<Lang>("travel_ai_lang", "pl");
@@ -49,18 +57,29 @@ export default function Home() {
   const updateForm = <K extends keyof TravelFormData>(key: K, value: TravelFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
+  const updateDestination = (value: string) => {
+    updateForm("destination", value);
+    updateForm("destinations", parseDestinations(value));
+  };
+
   const handleGenerate = useCallback(async () => {
-    if (!formData.destination || !formData.country || !formData.language) {
+    const destinations = getDestinations(formData);
+    if (!destinations.length || !formData.country) {
       setError(tr.errors.fillRequired);
       return;
     }
+    const requestFormData = {
+      ...formData,
+      destination: destinations.join(", "),
+      destinations,
+    };
     setError("");
     setLoading(true);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formData, lang }),
+        body: JSON.stringify({ formData: requestFormData, lang }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -155,12 +174,13 @@ export default function Home() {
         <div className="card p-6">
           <p className="section-label">🌍 Destination</p>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5">
                 {tr.destination} <span className="text-red-400">*</span>
               </label>
-              <input className="input" placeholder={tr.placeholders.destination}
-                value={formData.destination} onChange={e => updateForm("destination", e.target.value)} />
+              <textarea className="input min-h-[92px] resize-y" placeholder={tr.placeholders.destination}
+                value={formData.destination} onChange={e => updateDestination(e.target.value)} />
+              <p className="text-xs text-slate-400 mt-1.5">{tr.destinationHint}</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1.5">
@@ -168,13 +188,6 @@ export default function Home() {
               </label>
               <input className="input" placeholder={tr.placeholders.country}
                 value={formData.country} onChange={e => updateForm("country", e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                {tr.language} <span className="text-red-400">*</span>
-              </label>
-              <input className="input" placeholder={tr.placeholders.language}
-                value={formData.language} onChange={e => updateForm("language", e.target.value)} />
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5">
@@ -375,6 +388,7 @@ export default function Home() {
   // ---- RESULTS ----
   const renderResults = () => {
     if (!results) return null;
+    const destinationText = getDestinations(formData).join(", ") || formData.destination;
     const tabs: { key: Tab; icon: string }[] = [
       { key: "phrasebook", icon: "📖" },
       { key: "checklist", icon: "✅" },
@@ -398,7 +412,7 @@ export default function Home() {
               </button>
             </div>
             <h2 className="text-2xl font-black text-slate-900">
-              ✈️ {formData.destination}, {formData.country}
+              ✈️ {destinationText}, {formData.country}
             </h2>
             <p className="text-sm text-slate-500 mt-1">
               {formData.tripStyles.map(s => tr.styles[s]).join(" · ")}
@@ -435,7 +449,7 @@ export default function Home() {
             )}
             {activeTab === "map" && (
               <TravelMap points={results.map_points ?? []} lang={lang}
-                destination={formData.destination} country={formData.country} />
+                destination={destinationText} country={formData.country} />
             )}
             {activeTab === "tips" && results.tips && (
               <Tips data={results.tips} />

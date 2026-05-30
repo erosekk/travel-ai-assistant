@@ -17,8 +17,8 @@ export type BudgetLevel = "low" | "mid" | "high";
 // ---- Form Input ----
 export interface TravelFormData {
   destination: string;
+  destinations: string[];
   country: string;
-  language: string;
   tripStyles: TripStyle[];      // wielokrotny wybór
   budgetLevel: BudgetLevel;     // niski / średni / wysoki (kontekst dla AI)
   budgetAmount: string;         // kwota wpisana ręcznie np. "500 PLN"
