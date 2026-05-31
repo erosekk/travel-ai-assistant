@@ -93,7 +93,7 @@ export const translations = {
     errors: {
       fillRequired: "Wypełnij wymagane pola: miasto lub miasta oraz kraj.",
       apiKeyMissing: "Wklej swój klucz Anthropic API, aby kontynuować.",
-      apiError: "Błąd API. Sprawdź klucz i spróbuj ponownie.",
+      apiError: "Nie udało się wygenerować planu. Spróbuj ponownie.",
       parseError: "Błąd parsowania odpowiedzi AI. Spróbuj ponownie.",
     },
 
@@ -195,7 +195,7 @@ export const translations = {
     errors: {
       fillRequired: "Fill required fields: city or cities and country.",
       apiKeyMissing: "Paste your Anthropic API key to continue.",
-      apiError: "API Error. Check your key and try again.",
+      apiError: "Could not generate the plan. Please try again.",
       parseError: "Failed to parse AI response. Please try again.",
     },
 
