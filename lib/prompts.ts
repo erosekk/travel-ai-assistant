@@ -39,7 +39,7 @@ CRITICAL PERSONALIZATION RULES:
 
 JSON structure:
 {
-  phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions). Pronunciation MUST use Polish phonetics (jak Polak by to czytał), e.g. "bon-żur" not "bon-ZHOOR", "mersi" not "mehr-SEE", "silwuple" not "see voo PLEH"
+  "phrasebook": [{"local":"string","translation":"string","pronunciation":"string","category":"greetings"}],
   "checklist": {"documents":["string"],"clothes":["string"],"electronics":["string"],"medicine":["string"],"transport":["string"],"money":["string"],"local_specific":["string"]},
   "itinerary": [{"day":1,"title":"string","items":[{"time":"HH:MM","activity":"string","location":"string","cost":"string","tip":"string"}]}],
   "map_points": [{"name":"string","category":"string","description":"string","address":"string","lat":0.0,"lng":0.0,"order":1}],
@@ -47,7 +47,10 @@ JSON structure:
 }
 
 Rules:
-- phrasebook: exactly 15 phrases, 6 categories (greetings, restaurant, transport, directions, emergency, expressions). Pronunciation MUST use Polish phonetics (jak Polak by to czytał), e.g. "bon-żur" not "bon-ZHOOR", "mersi" not "mehr-SEE", "silwuple" not "see voo PLEH"
+- phrasebook: exactly 15 non-empty objects in a flat array, not grouped by category. Use categories: greetings, restaurant, transport, directions, emergency, expressions.
+- phrasebook local: MUST be in the inferred local language. For Greece, local MUST be Greek, e.g. Greek alphabet text.
+- phrasebook translation: MUST be in the UI language.
+- phrasebook pronunciation: MUST be non-empty and use Polish phonetics when UI language is Polish, e.g. "ja sas", "efharisto", not English phonetics.
 - checklist: 2-3 items per category, destination-specific, use current local currency
 - itinerary: exactly one object per day, 4-5 realistic items per day from 09:00 to 22:00, use current prices in correct currency. For families or slower pace, use fewer items and more breaks.
 - map_points: 6-8 real places, distributed across destination cities when there are multiple destinations. ALL coordinates must be precise and within the relevant city/area boundaries

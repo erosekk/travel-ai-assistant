@@ -33,9 +33,9 @@ function parseTravelPlan(rawText: string): TravelPlan {
   const jsonStr = extractJson(rawText);
 
   try {
-    return JSON.parse(jsonStr) as TravelPlan;
+    return validateTravelPlan(JSON.parse(jsonStr) as TravelPlan);
   } catch {
-    throw new Error("AI returned invalid JSON. Try again.");
+    throw new Error("AI returned an incomplete travel plan. Try again.");
   }
 }
 
@@ -43,6 +43,34 @@ function readClaudeText(data: ClaudeResponse, assistantPrefill: string) {
   const text = data.content?.find((part) => part.type === "text" || part.text)?.text ?? "";
   const trimmed = text.trimStart();
   return trimmed.startsWith("{") ? text : `${assistantPrefill}${text}`;
+}
+
+function hasText(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function validateTravelPlan(plan: TravelPlan): TravelPlan {
+  const phrasebook = Array.isArray(plan.phrasebook) ? plan.phrasebook : [];
+  const validPhrases = phrasebook.filter(
+    (phrase) =>
+      hasText(phrase.local) &&
+      hasText(phrase.translation) &&
+      hasText(phrase.pronunciation) &&
+      hasText(phrase.category)
+  );
+
+  if (validPhrases.length < 10) {
+    throw new Error("Phrasebook is incomplete.");
+  }
+
+  if (!plan.checklist || !Array.isArray(plan.itinerary) || !Array.isArray(plan.map_points) || !plan.tips) {
+    throw new Error("Travel plan is missing required sections.");
+  }
+
+  return {
+    ...plan,
+    phrasebook: validPhrases,
+  };
 }
 
 /**
@@ -120,7 +148,9 @@ export async function callClaude(
   } catch {
     const retryPrompt = `${userPrompt}
 
-Your previous response was not valid JSON. Return a shorter response as strict JSON only. Do not include markdown, explanations, facts, or fields outside the schema.`;
+Your previous response was not valid JSON or had an empty phrasebook. Return a shorter response as strict JSON only.
+Regenerate the complete phrasebook as 15 flat, non-empty objects. For Greece, phrasebook.local must be Greek text.
+Do not include markdown, explanations, facts, or fields outside the schema.`;
     return parseTravelPlan(await request(retryPrompt));
   }
 }
