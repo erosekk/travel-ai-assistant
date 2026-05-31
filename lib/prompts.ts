@@ -47,15 +47,15 @@ JSON structure:
 }
 
 Rules:
-- phrasebook: exactly 15 non-empty objects in a flat array, not grouped by category. Use categories: greetings, restaurant, transport, directions, emergency, expressions.
+- phrasebook: exactly 12 non-empty objects in a flat array, not grouped by category. Use categories: greetings, restaurant, transport, directions, emergency, expressions.
 - phrasebook local: MUST be in the inferred local language. For Greece, local MUST be Greek, e.g. Greek alphabet text.
 - phrasebook translation: MUST be in the UI language.
 - phrasebook pronunciation: MUST be non-empty and use Polish phonetics when UI language is Polish, e.g. "ja sas", "efharisto", not English phonetics.
-- checklist: 2-3 items per category, destination-specific, use current local currency
-- itinerary: exactly one object per day, 4-5 realistic items per day from 09:00 to 22:00, use current prices in correct currency. For families or slower pace, use fewer items and more breaks.
-- map_points: 6-8 real places, distributed across destination cities when there are multiple destinations. ALL coordinates must be precise and within the relevant city/area boundaries
-- tips: exactly 3 items per category, current and accurate
-- Keep all text SHORT and concise. Each string should be under 120 characters where possible`;
+- checklist: 2 items per category, destination-specific, use current local currency
+- itinerary: exactly one object per day. For 1-7 days use 4 items/day. For 8-14 days use exactly 3 items/day. Use current prices in correct currency.
+- map_points: exactly 6 real places, distributed across destination cities when there are multiple destinations. ALL coordinates must be precise and within the relevant city/area boundaries
+- tips: exactly 2 items per category, current and accurate
+- Keep all text SHORT and concise. Each string should be under 90 characters where possible`;
 }
 
 const parseDestinations = (value: string) =>
@@ -86,6 +86,12 @@ export function buildUserPrompt(data: TravelFormData, lang: Lang): string {
   const budgetStr = data.budgetAmount
     ? `${data.budgetAmount} (${data.budgetLevel})`
     : data.budgetLevel;
+  const longTripNote =
+    data.days > 7
+      ? lang === "pl"
+        ? "To długi wyjazd: użyj dokładnie 3 krótkich aktywności dziennie, bez rozbudowanych opisów."
+        : "This is a long trip: use exactly 3 short activities per day, no long descriptions."
+      : "";
 
   if (lang === "pl") {
     return `Plan podróży:
@@ -98,6 +104,7 @@ Sezon: ${data.season || "nie podano"}
 Preferencje: ${data.preferences || "brak"}
 ${multiCityNote}
 ${luxuryNote}
+${longTripNote}
 
 WAŻNE: Użyj aktualnej waluty ${data.country}. Punkty na mapie muszą być dokładnie w odpowiednim mieście lub obszarze trasy: ${destinationText}. Sprawdź każdą współrzędną.
 Preferencje użytkownika mają wpływać na realny plan: jeśli jest auto, planuj przejazdy i zwiedzanie poza bazą; jeśli są dzieci, tempo ma być spokojniejsze i rodzinne.
@@ -115,6 +122,7 @@ Season: ${data.season || "not specified"}
 Preferences: ${data.preferences || "none"}
 ${multiCityNote}
 ${luxuryNote}
+${longTripNote}
 
 IMPORTANT: Use current currency of ${data.country}. Map points must be precisely in the correct city or trip area: ${destinationText}. Verify every coordinate.
 User preferences must shape the real plan: if there is a rental car, plan drives and exploration beyond the base; if there are kids, use a calmer family-friendly pace.

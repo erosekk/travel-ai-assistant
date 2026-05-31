@@ -14,6 +14,13 @@ type ClaudeResponse = {
   stop_reason?: string;
 };
 
+class LongResponseError extends Error {
+  constructor() {
+    super("AI response was too long.");
+    this.name = "LongResponseError";
+  }
+}
+
 function extractJson(rawText: string): string {
   const cleaned = rawText
     .replace(/```json/gi, "")
@@ -107,6 +114,15 @@ export async function callClaude(
 ): Promise<TravelPlan> {
   const systemPrompt = buildSystemPrompt(lang);
   const userPrompt = buildUserPrompt(formData, lang);
+  const compactInstruction = `
+
+COMPACT MODE:
+- Return strict JSON only.
+- Use 12 phrasebook phrases.
+- Use exactly 3 itinerary items per day.
+- Use exactly 6 map_points total.
+- Use 2 checklist items per category and 2 tips per category.
+- Keep every string very short.`;
 
   const request = async (prompt: string) => {
     const assistantPrefill = "{";
@@ -135,13 +151,22 @@ export async function callClaude(
 
     const data = (await response.json()) as ClaudeResponse;
     if (data.stop_reason === "max_tokens") {
-      throw new Error("AI response was too long. Try fewer days or fewer cities.");
+      throw new LongResponseError();
     }
 
     return readClaudeText(data, assistantPrefill);
   };
 
-  const rawText = await request(userPrompt);
+  let rawText: string;
+
+  try {
+    rawText = await request(userPrompt);
+  } catch (error) {
+    if (!(error instanceof LongResponseError)) {
+      throw error;
+    }
+    rawText = await request(`${userPrompt}${compactInstruction}`);
+  }
 
   try {
     return parseTravelPlan(rawText);
@@ -149,8 +174,9 @@ export async function callClaude(
     const retryPrompt = `${userPrompt}
 
 Your previous response was not valid JSON or had an empty phrasebook. Return a shorter response as strict JSON only.
-Regenerate the complete phrasebook as 15 flat, non-empty objects. For Greece, phrasebook.local must be Greek text.
-Do not include markdown, explanations, facts, or fields outside the schema.`;
+Regenerate the complete phrasebook as 12 flat, non-empty objects. For Greece, phrasebook.local must be Greek text.
+Do not include markdown, explanations, facts, or fields outside the schema.
+${compactInstruction}`;
     return parseTravelPlan(await request(retryPrompt));
   }
 }
