@@ -3,6 +3,7 @@
 // =============================================
 
 import { Lang, TravelFormData } from "@/types";
+import { getDestinations } from "./travelLimits";
 
 export function buildSystemPrompt(lang: Lang): string {
   const langInstruction =
@@ -57,15 +58,6 @@ Rules:
 - tips: exactly 2 items per category, current and accurate
 - Keep all text SHORT and concise. Each string should be under 90 characters where possible`;
 }
-
-const parseDestinations = (value: string) =>
-  value
-    .split(/[\n,;]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const getDestinations = (data: TravelFormData) =>
-  data.destinations?.length ? data.destinations : parseDestinations(data.destination);
 
 export function buildUserPrompt(data: TravelFormData, lang: Lang): string {
   const destinations = getDestinations(data);

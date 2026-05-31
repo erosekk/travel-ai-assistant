@@ -4,6 +4,7 @@
 import { useState, useCallback } from "react";
 import { Lang, TravelFormData, TravelPlan, TripStyle, BudgetLevel } from "@/types";
 import { t } from "@/lib/i18n";
+import { getDestinations, MAX_DESTINATIONS, parseDestinations } from "@/lib/travelLimits";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Navbar } from "@/components/ui/Navbar";
 import { Phrasebook } from "@/components/results/Phrasebook";
@@ -32,15 +33,6 @@ const DEFAULT_FORM: TravelFormData = {
   preferences: "",
 };
 
-const parseDestinations = (value: string) =>
-  value
-    .split(/[\n,;]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const getDestinations = (data: TravelFormData) =>
-  data.destinations?.length ? data.destinations : parseDestinations(data.destination);
-
 export default function Home() {
   const [lang, setLang] = useLocalStorage<Lang>("travel_ai_lang", "pl");
   const [dark, setDark] = useLocalStorage<boolean>("travel_ai_dark", false);
@@ -66,6 +58,10 @@ export default function Home() {
     const destinations = getDestinations(formData);
     if (!destinations.length || !formData.country) {
       setError(tr.errors.fillRequired);
+      return;
+    }
+    if (destinations.length > MAX_DESTINATIONS) {
+      setError(tr.errors.tooManyDestinations);
       return;
     }
     const requestFormData = {

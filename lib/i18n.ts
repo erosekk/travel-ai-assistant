@@ -22,7 +22,7 @@ export const translations = {
 
     // Form labels
     destination: "Miasto / miasta docelowe",
-    destinationHint: "Wpisz jedno miasto albo kilka po przecinku lub w osobnych liniach.",
+    destinationHint: "Wpisz maksymalnie 4 miasta po przecinku lub w osobnych liniach.",
     country: "Kraj",
     tripStyle: "Styl podróży",
     tripStyleHint: "wybierz jeden lub więcej",
@@ -92,6 +92,7 @@ export const translations = {
     // Errors
     errors: {
       fillRequired: "Wypełnij wymagane pola: miasto lub miasta oraz kraj.",
+      tooManyDestinations: "Wybierz maksymalnie 4 miasta, żeby plan był dokładny i stabilny.",
       apiKeyMissing: "Wklej swój klucz Anthropic API, aby kontynuować.",
       apiError: "Nie udało się wygenerować planu. Spróbuj ponownie.",
       parseError: "Błąd parsowania odpowiedzi AI. Spróbuj ponownie.",
@@ -132,7 +133,7 @@ export const translations = {
     aboutBtn: "About",
 
     destination: "Destination city / cities",
-    destinationHint: "Enter one city, or several separated by commas or new lines.",
+    destinationHint: "Enter up to 4 cities, separated by commas or new lines.",
     country: "Country",
     tripStyle: "Trip Style",
     tripStyleHint: "pick one or more",
@@ -194,6 +195,7 @@ export const translations = {
 
     errors: {
       fillRequired: "Fill required fields: city or cities and country.",
+      tooManyDestinations: "Choose up to 4 cities so the plan stays accurate and stable.",
       apiKeyMissing: "Paste your Anthropic API key to continue.",
       apiError: "Could not generate the plan. Please try again.",
       parseError: "Failed to parse AI response. Please try again.",
